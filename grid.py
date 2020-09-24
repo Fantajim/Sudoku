@@ -1,4 +1,4 @@
-
+import pygame
 
 class Grid:
 
@@ -36,8 +36,8 @@ class Grid:
         pass
 
     def draw(self):
+       pass
 
-        pass
 
     def select(self):
         pass
