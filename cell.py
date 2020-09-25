@@ -20,7 +20,7 @@ class Cell:
             self.is_original = False
 
     def draw_cell(self, win):
-        font = pygame.font.SysFont("couriersans", 40)
+        font = pygame.font.Font("data/FiraCode-Regular.ttf", 40)
         distance_x = self.width / 9
         distance_y = self.height / 9
         x = distance_x * self.col

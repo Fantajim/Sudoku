@@ -9,13 +9,13 @@ grid_size = 9
 window = pygame.display.set_mode(window_size)
 pygame.font.init()
 
-
 def redraw_window(win, grid, t):
     win.fill((255, 255, 255))  # make window white
-    font = pygame.font.SysFont("comicsans", 40)
+    font = pygame.font.Font("data/FiraCode-Regular.ttf", 40)
     text = font.render("Time " + format_time(t), 1, (0, 0, 0))
     win.blit(text, (window_size[0] - (text.get_width()+20), window_size[1]-(text.get_height()/2+50)))
     grid.draw_grid(win)
+
 
 
 def format_time(secs):
@@ -32,10 +32,16 @@ def main():
     key = None
     running = True
     start = time.time()
+    # pygame GUI
+    gui_manager = pygame_gui.UIManager(window_size, 'theme.json')
+    clock = pygame.time.Clock()
+
+    btn_auto_solve = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((25, window_size[1]-75), (100, 50)), text="Autosolve", manager=gui_manager)
+    btn_check = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((150, window_size[1]-75), (100, 50)), text="Check", manager=gui_manager)
 
     while running:
-        play_time = round(time.time() - start)
-
+        time_delta = clock.tick(60)/1000
+        play_time = round((time.time() - start))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -75,10 +81,21 @@ def main():
                     grid.select_cell(mouse_click[0], mouse_click[1])
                     key = None
 
+            if event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == btn_auto_solve:
+                        pass
+                    if event.ui_element == btn_check:
+                        pass
+
+            gui_manager.process_events(event)
+        gui_manager.update(time_delta)
+
         if grid.selected_cell and key is not None:
             grid.enter_value(key)
 
         redraw_window(window, grid, play_time)
+        gui_manager.draw_ui(window)
         pygame.display.update()
 
 
