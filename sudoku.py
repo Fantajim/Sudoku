@@ -2,20 +2,21 @@ import pygame
 from grid import Grid
 import time
 import pygame_gui
+from utility import find_empty
 
 window_size = (900, 900)
-game_size = window_size[0], window_size[1]-100
+game_size = window_size[0], window_size[1] - 100
 grid_size = 9
 window = pygame.display.set_mode(window_size)
 pygame.font.init()
+
 
 def redraw_window(win, grid, t):
     win.fill((255, 255, 255))  # make window white
     font = pygame.font.Font("data/FiraCode-Regular.ttf", 40)
     text = font.render("Time " + format_time(t), 1, (0, 0, 0))
-    win.blit(text, (window_size[0] - (text.get_width()+20), window_size[1]-(text.get_height()/2+50)))
+    win.blit(text, (window_size[0] - (text.get_width() + 20), window_size[1] - (text.get_height() / 2 + 50)))
     grid.draw_grid(win)
-
 
 
 def format_time(secs):
@@ -36,11 +37,13 @@ def main():
     gui_manager = pygame_gui.UIManager(window_size, 'theme.json')
     clock = pygame.time.Clock()
 
-    btn_auto_solve = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((25, window_size[1]-75), (100, 50)), text="Autosolve", manager=gui_manager)
-    btn_check = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((150, window_size[1]-75), (100, 50)), text="Check", manager=gui_manager)
+    btn_auto_solve = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((25, window_size[1] - 75), (100, 50)),
+                                                  text="Autosolve", manager=gui_manager)
+    btn_check = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((150, window_size[1] - 75), (100, 50)),
+                                             text="Check", manager=gui_manager)
 
     while running:
-        time_delta = clock.tick(60)/1000
+        time_delta = clock.tick(60) / 1000
         play_time = round((time.time() - start))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -84,7 +87,8 @@ def main():
             if event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == btn_auto_solve:
-                        pass
+                        grid.solve_gui()
+
                     if event.ui_element == btn_check:
                         pass
 

@@ -1,6 +1,6 @@
 import pygame
 from cell import Cell
-from utility import valid
+from utility import valid, find_empty
 
 
 class Grid:
@@ -107,3 +107,32 @@ class Grid:
                     cell.is_wrong = False
                     if not valid(self.board_model, cell.value, (cell.row, cell.col)):
                         cell.is_wrong = True
+
+    def solve_gui(self):
+        self.update_model_values()
+        find = find_empty(self.board_model)
+        if not find:
+            return True
+        else:
+            row, col = find
+
+        for i in range(1, 10):
+            if valid(self.board_model, i, (row, col)):
+                self.board_model[row][col] = i
+                self.cells[row][col].value = i
+                self.cells[row][col].draw_change(self.windows, True)
+                self.update_model_values()
+                pygame.display.update()
+                pygame.time.delay(100)
+
+                if self.solve_gui():
+                    return True
+
+                self.board_model[row][col] = 0
+                self.cells[row][col].value = 0
+                self.update_model_values()
+                self.cells[row][col].draw_change(self.windows, False)
+                pygame.display.update()
+                pygame.time.delay(100)
+
+        return False

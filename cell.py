@@ -39,3 +39,20 @@ class Cell:
             pygame.draw.rect(win, (0, 0, 255), (x, y + 1, distance_x, distance_y), 4)
 
 
+    def draw_change(self, win, g=True):
+        fnt = pygame.font.Font("data/FiraCode-Regular.ttf", 40)
+        distance_x = self.width / 9
+        distance_y = self.height / 9
+        x = self.col * distance_x
+        y = self.row * distance_y
+
+        pygame.draw.rect(win, (255, 255, 255), (x, y, distance_x, distance_y), 0)
+
+        text = fnt.render(str(self.value), 1, (0, 0, 0))
+        win.blit(text, (x + (distance_x / 2 - text.get_width() / 2), y + (distance_y / 2 - text.get_height() / 2)))
+        if g:
+            pygame.draw.rect(win, (0, 255, 0), (x, y, distance_x, distance_y), 3)
+        else:
+            pygame.draw.rect(win, (255, 0, 0), (x, y, distance_x, distance_y), 3)
+
+
