@@ -1,50 +1,21 @@
 import pygame
 from grid import Grid
-from cell import Cell
 import time
+import pygame_gui
 
-window_size = (800, 600)
+window_size = (900, 900)
+game_size = window_size[0], window_size[1]-100
 grid_size = 9
 window = pygame.display.set_mode(window_size)
 pygame.font.init()
 
 
-def find_empty(bo):
-    for i in range(len(bo)):
-        for j in range(len(bo[0])):
-            if bo[i][j] == 0:
-                return i, j  # row, col
-
-
-def valid(bo, num, pos):
-    # row
-    for i in range(len(bo[0])):
-        if bo[pos[0]][i] == num and pos[1] != i:
-            return False
-
-    # col
-    for i in range(len(bo)):
-        if bo[i][pos[1]] == num and pos[0] != i:
-            return False
-
-    # box
-    box_x = pos[1] / 3
-    box_y = pos[0] / 3
-
-    for i in range(box_y * 3, box_y * 3 + 3):
-        for j in range(box_x * 3, box_x * 3 + 3):
-            if bo[i][j] == num and (i, j) != pos:
-                return False
-
-    return True
-
-
-def redraw_window(win, board, t):
+def redraw_window(win, grid, t):
     win.fill((255, 255, 255))  # make window white
     font = pygame.font.SysFont("comicsans", 40)
     text = font.render("Time " + format_time(t), 1, (0, 0, 0))
-    window.blit(text, (window_size[0] - 100, window_size[1]))
-    board.draw()
+    win.blit(text, (window_size[0] - (text.get_width()+20), window_size[1]-(text.get_height()/2+50)))
+    grid.draw_grid(win)
 
 
 def format_time(secs):
@@ -57,7 +28,7 @@ def format_time(secs):
 
 def main():
     pygame.display.set_caption("Sudoku")
-    board = Grid(grid_size, grid_size, window_size[0], window_size[1], window)
+    grid = Grid(grid_size, grid_size, game_size[0], game_size[1], window)
     key = None
     running = True
     start = time.time()
@@ -88,23 +59,26 @@ def main():
                 if event.key == pygame.K_9 or event.key == pygame.K_KP9:
                     key = 9
                 if event.key == pygame.K_DELETE:
-                    pass
+                    grid.clear_value()
+                    key = None
                 if event.key == pygame.K_SPACE:
                     pass
                 if event.key == pygame.K_RETURN:
-                    pass
-
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
-                clicked = board.click(pos)
-                if clicked:
-                    board.select(clicked[0], clicked[1])
+                    if grid.check_values():
+                        print("Success")
                     key = None
 
-        if board.selected and key is not None:
-            board.sketch(key)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                mouse_click = grid.click(mouse_pos)
+                if mouse_click:
+                    grid.select_cell(mouse_click[0], mouse_click[1])
+                    key = None
 
-        redraw_window(window, board, play_time)
+        if grid.selected_cell and key is not None:
+            grid.enter_value(key)
+
+        redraw_window(window, grid, play_time)
         pygame.display.update()
 
 
