@@ -2,7 +2,7 @@ import pygame
 from grid import Grid
 import time
 import pygame_gui
-from utility import find_empty, generate_board
+from utility import generate_board, find_empty, valid_grid
 
 window_size = (900, 900)
 game_size = window_size[0], window_size[1] - 100
@@ -40,6 +40,7 @@ def format_time(secs):
 
 
 def main():
+    global board
     pygame.display.set_caption("Sudoku")
     grid = Grid(grid_size, grid_size, game_size[0], game_size[1], board, window)
     key = None
@@ -48,11 +49,13 @@ def main():
     # pygame GUI
     gui_manager = pygame_gui.UIManager(window_size, 'theme.json')
     clock = pygame.time.Clock()
+    won = None
 
     btn_auto_solve = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((25, window_size[1] - 75), (100, 50)),
                                                   text="Autosolve", manager=gui_manager)
     btn_generate = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((150, window_size[1] - 75), (120, 50)),
                                              text="Generate new", manager=gui_manager)
+    ddm_difficulty = pygame_gui.elements.UIDropDownMenu(["Easy", "Medium", "Hard", "Very Hard"],"Medium",relative_rect=pygame.Rect((300, window_size[1]-75), (120,50)), manager=gui_manager)
 
     while running:
         time_delta = clock.tick(60) / 1000
@@ -61,6 +64,8 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN:
+                if won is not None:
+                    won.hide()
                 if event.key == pygame.K_1 or event.key == pygame.K_KP1:
                     key = 1
                 if event.key == pygame.K_2 or event.key == pygame.K_KP2:
@@ -90,6 +95,8 @@ def main():
                     key = None
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                if won is not None:
+                    won.hide()
                 mouse_pos = pygame.mouse.get_pos()
                 mouse_click = grid.click(mouse_pos)
                 if mouse_click:
@@ -105,7 +112,18 @@ def main():
                             grid.solve_gui()
 
                     if event.ui_element == btn_generate:
-                        grid = Grid(grid_size, grid_size, game_size[0], game_size[1], generate_board(), window)
+                        if won is not None:
+                            won.hide()
+                            won = None
+                        difficulty = ddm_difficulty.current_state.selected_option
+                        wait = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((window_size[0]/2-200, window_size[1]/2-100),(400,200)),text="Please wait...Your new Sudoku is being created",manager=gui_manager, visible=1)
+                        gui_manager.update(time_delta)
+                        gui_manager.draw_ui(window)
+                        pygame.display.update()
+                        grid.board_model = None
+                        grid = Grid(grid_size, grid_size, game_size[0], game_size[1], generate_board(difficulty), window)
+                        wait.hide()
+                        start = time.time()
                         continue
 
             gui_manager.process_events(event)
@@ -113,6 +131,11 @@ def main():
 
         if grid.selected_cell and key is not None:
             grid.enter_value(key)
+
+        if grid.board_model is not None and find_empty(grid.board_model) is None and won is None and valid_grid(grid):
+            won = pygame_gui.elements.UILabel(
+                relative_rect=pygame.Rect((window_size[0] / 2 - 200, window_size[1] / 2 - 100), (400, 200)),
+                text="Sudoku is solved, Congrats!", manager=gui_manager, visible=1)
 
         redraw_window(window, grid, play_time)
         gui_manager.draw_ui(window)

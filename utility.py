@@ -71,32 +71,39 @@ def shuffle(s): return sample(s, len(s))
 def pattern(r, c): return (base * (r % base) + r // base + c) % side
 
 
-def generate_board():
-    # todo new generator
+def generate_board(difficulty):
     global board
     global solution_list
     solution_list.clear()
-    rBase = range(base)
-    rows = [g * base + r for g in shuffle(rBase) for r in shuffle(rBase)]
-    cols = [g * base + c for g in shuffle(rBase) for c in shuffle(rBase)]
+
+    r_base = range(base)  # 3
+    rows = [g * base + r for g in shuffle(r_base) for r in shuffle(r_base)]
+    cols = [g * base + c for g in shuffle(r_base) for c in shuffle(r_base)]
     nums = shuffle(range(1, base * base + 1))
 
     # produce board using randomized baseline pattern
     board = [[nums[pattern(r, c)] for c in cols] for r in rows]
 
-    squares = side * side
-    empties = squares * 3 // 5
+    empties = 0
+    squares = side * side  # 81
+    if difficulty == "Easy":
+        empties = 20
+    elif difficulty == "Medium":
+        empties = 30
+    elif difficulty == "Hard":
+        empties = 40
+    elif difficulty == "Very Hard":
+        empties = 50
+
     for p in sample(range(squares), empties):
-        #todo implement backtrack remover
         board[p // side][p % side] = 0
 
     solve()
 
     # print(solution_list)
     if len(solution_list) > 1:
-        generate_board()
+        generate_board(difficulty)
     else:
-        print("one solution")
         return board
 
     return board
@@ -118,4 +125,13 @@ def solve():
     solution_list.append(solution)
     if len(solution_list) > 1:
         return solution_list
-    print(board)
+
+
+def valid_grid(grid):
+    for i in range(len(grid.cells)):
+        for j in range(len(grid.cells[0])):
+            if valid(grid.cells, grid.cells[i][j].value, (i,j)):
+                pass
+            else:
+                return False
+    return True

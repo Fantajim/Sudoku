@@ -52,5 +52,15 @@
          {
              "tool_tip_delay": "1.5"
          }
-     }
- }
+     },
+
+     "drop_down_menu":
+        {
+          "misc": {
+              "expand_direction" : "up"
+          }
+
+
+        }
+
+  }
