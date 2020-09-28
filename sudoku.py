@@ -36,6 +36,13 @@ def format_time(secs):
     minute = secs // 60
     hour = minute // 60
 
+    if minute < 10 and minute > 0:
+        minute = "0"+str(minute)
+    if sec < 10:
+        sec = "0"+ str(sec)
+
+
+
     return f"{minute}:{sec}"
 
 
@@ -47,15 +54,18 @@ def main():
     running = True
     start = time.time()
     # pygame GUI
-    gui_manager = pygame_gui.UIManager(window_size, 'theme.json')
+    gui_manager = pygame_gui.UIManager(window_size, 'data/theme.json')
     clock = pygame.time.Clock()
     won = None
 
-    btn_auto_solve = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((25, window_size[1] - 75), (100, 50)),
+    btn_auto_solve = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, window_size[1] - 75), (100, 50)),
                                                   text="Autosolve", manager=gui_manager)
-    btn_generate = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((150, window_size[1] - 75), (120, 50)),
-                                             text="Generate new", manager=gui_manager)
-    ddm_difficulty = pygame_gui.elements.UIDropDownMenu(["Easy", "Medium", "Hard", "Very Hard"],"Medium",relative_rect=pygame.Rect((300, window_size[1]-75), (120,50)), manager=gui_manager)
+    btn_generate = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((100, window_size[1] - 75), (120, 50)),
+                                                text="Generate new", manager=gui_manager)
+    ddm_difficulty = pygame_gui.elements.UIDropDownMenu(["Easy", "Medium", "Hard", "Very Hard"], "Medium",
+                                                        relative_rect=pygame.Rect((220, window_size[1] - 75),
+                                                                                  (120, 50)), manager=gui_manager)
+    #btn_options = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((450, window_size[1] -75), (100, 50)),text="Options", manager=gui_manager)
 
     while running:
         time_delta = clock.tick(60) / 1000
@@ -107,6 +117,9 @@ def main():
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == btn_auto_solve:
                         grid.delay = 100.0
+                        grid.update_model_values()
+                        if find_empty(grid.board_model) is None:
+                            grid.clear_values()
                         if not grid.solve_gui():
                             grid.clear_values()
                             grid.solve_gui()
@@ -116,12 +129,15 @@ def main():
                             won.hide()
                             won = None
                         difficulty = ddm_difficulty.current_state.selected_option
-                        wait = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((window_size[0]/2-200, window_size[1]/2-100),(400,200)),text="Please wait...Your new Sudoku is being created",manager=gui_manager, visible=1)
+                        wait = pygame_gui.elements.UILabel(
+                            relative_rect=pygame.Rect((window_size[0] / 2 - 250, window_size[1] / 2 - 100), (500, 200)),
+                            text="Please wait...new Sudoku puzzle is being calculated", manager=gui_manager, visible=1)
                         gui_manager.update(time_delta)
                         gui_manager.draw_ui(window)
                         pygame.display.update()
                         grid.board_model = None
-                        grid = Grid(grid_size, grid_size, game_size[0], game_size[1], generate_board(difficulty), window)
+                        grid = Grid(grid_size, grid_size, game_size[0], game_size[1], generate_board(difficulty),
+                                    window)
                         wait.hide()
                         start = time.time()
                         continue
@@ -132,10 +148,13 @@ def main():
         if grid.selected_cell and key is not None:
             grid.enter_value(key)
 
-        if grid.board_model is not None and find_empty(grid.board_model) is None and won is None and valid_grid(grid):
+        if grid.board_model is not None and find_empty(grid.board_model) is None and won is None and valid_grid(
+                grid.board_model):
             won = pygame_gui.elements.UILabel(
                 relative_rect=pygame.Rect((window_size[0] / 2 - 200, window_size[1] / 2 - 100), (400, 200)),
                 text="Sudoku is solved, Congrats!", manager=gui_manager, visible=1)
+        elif grid.board_model is not None and find_empty(grid.board_model) is None:
+            grid.check_values()
 
         redraw_window(window, grid, play_time)
         gui_manager.draw_ui(window)

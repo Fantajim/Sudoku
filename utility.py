@@ -128,9 +128,9 @@ def solve():
 
 
 def valid_grid(grid):
-    for i in range(len(grid.cells)):
-        for j in range(len(grid.cells[0])):
-            if valid(grid.cells, grid.cells[i][j].value, (i,j)):
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
+            if valid(grid, grid[i][j], (i,j)):
                 pass
             else:
                 return False

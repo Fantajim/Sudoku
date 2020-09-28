@@ -30,8 +30,8 @@
      {
          "colours":
          {
-             "normal_bg":"#ffffff",
-             "hovered_bg":"#35393e",
+             "normal_bg":"#35393e",
+             "hovered_bg":"#254361",
              "disabled_bg":"#25292e",
              "selected_bg":"#193754",
              "active_bg":"#193754",
@@ -59,7 +59,6 @@
           "misc": {
               "expand_direction" : "up"
           }
-
 
         }
 
