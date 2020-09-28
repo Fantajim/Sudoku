@@ -2,13 +2,25 @@ import pygame
 from grid import Grid
 import time
 import pygame_gui
-from utility import find_empty
+from utility import find_empty, generate_board
 
 window_size = (900, 900)
 game_size = window_size[0], window_size[1] - 100
 grid_size = 9
 window = pygame.display.set_mode(window_size)
 pygame.font.init()
+
+board = [
+    [7, 8, 0, 4, 0, 0, 1, 2, 0],
+    [6, 0, 0, 0, 7, 5, 0, 0, 9],
+    [0, 0, 0, 6, 0, 1, 0, 7, 8],
+    [0, 0, 7, 0, 4, 0, 2, 6, 0],
+    [0, 0, 1, 0, 5, 0, 9, 3, 0],
+    [9, 0, 4, 0, 6, 0, 0, 0, 5],
+    [0, 7, 0, 3, 0, 0, 0, 1, 2],
+    [1, 2, 0, 0, 0, 7, 4, 0, 0],
+    [0, 4, 9, 2, 0, 6, 0, 0, 7]
+]
 
 
 def redraw_window(win, grid, t):
@@ -29,7 +41,7 @@ def format_time(secs):
 
 def main():
     pygame.display.set_caption("Sudoku")
-    grid = Grid(grid_size, grid_size, game_size[0], game_size[1], window)
+    grid = Grid(grid_size, grid_size, game_size[0], game_size[1], board, window)
     key = None
     running = True
     start = time.time()
@@ -39,8 +51,8 @@ def main():
 
     btn_auto_solve = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((25, window_size[1] - 75), (100, 50)),
                                                   text="Autosolve", manager=gui_manager)
-    btn_check = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((150, window_size[1] - 75), (100, 50)),
-                                             text="Check", manager=gui_manager)
+    btn_generate = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((150, window_size[1] - 75), (120, 50)),
+                                             text="Generate new", manager=gui_manager)
 
     while running:
         time_delta = clock.tick(60) / 1000
@@ -87,10 +99,14 @@ def main():
             if event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == btn_auto_solve:
-                        grid.solve_gui()
+                        grid.delay = 100.0
+                        if not grid.solve_gui():
+                            grid.clear_values()
+                            grid.solve_gui()
 
-                    if event.ui_element == btn_check:
-                        pass
+                    if event.ui_element == btn_generate:
+                        grid = Grid(grid_size, grid_size, game_size[0], game_size[1], generate_board(), window)
+                        continue
 
             gui_manager.process_events(event)
         gui_manager.update(time_delta)

@@ -4,27 +4,18 @@ from utility import valid, find_empty
 
 
 class Grid:
-    board = [
-        [7, 8, 0, 4, 0, 0, 1, 2, 0],
-        [6, 0, 0, 0, 7, 5, 0, 0, 9],
-        [0, 0, 0, 6, 0, 1, 0, 7, 8],
-        [0, 0, 7, 0, 4, 0, 2, 6, 0],
-        [0, 0, 1, 0, 5, 0, 9, 3, 0],
-        [9, 0, 4, 0, 6, 0, 0, 0, 5],
-        [0, 7, 0, 3, 0, 0, 0, 1, 2],
-        [1, 2, 0, 0, 0, 7, 4, 0, 0],
-        [0, 4, 9, 2, 0, 6, 0, 0, 7]
-    ]
 
-    def __init__(self, cols, rows, width, height, windows):
+    def __init__(self, cols, rows, width, height, board, windows):
         self.cols = cols
         self.rows = rows
         self.width = width
         self.height = height
+        self.board = board
         self.windows = windows
         self.cells = [[Cell(i, j, self.board[i][j], width, height) for j in range(cols)] for i in range(rows)]
         self.board_model = None
         self.selected_cell = None
+        self.delay = 100.0
 
     def update_model_values(self):
         self.board_model = [[self.cells[i][j].value for j in range(self.cols)] for i in range(self.rows)]
@@ -83,6 +74,14 @@ class Grid:
             self.cells[row][col].is_wrong = False
             self.cells[row][col].value = 0
 
+    def clear_values(self):
+        for i in range(len(self.board)):
+            for j in range(len(self.board[0])):
+                if not self.cells[i][j].is_original:
+                    self.cells[i][j].value = 0
+                    self.cells[i][j].is_selected = False
+        self.selected_cell = None
+
     def increase_value(self):
         row, col = self.selected_cell
         value = self.cells[row][col].value
@@ -92,6 +91,7 @@ class Grid:
         elif self.cells[row][col].is_original is False:
             self.cells[row][col].value += 1
         self.update_model_values()
+        pygame.display.update()
 
     def enter_value(self, val):
         row, col = self.selected_cell
@@ -123,7 +123,9 @@ class Grid:
                 self.cells[row][col].draw_change(self.windows, True)
                 self.update_model_values()
                 pygame.display.update()
-                pygame.time.delay(100)
+                pygame.time.delay(int(self.delay))
+                if self.delay > 0.5:
+                    self.delay -= 0.5
 
                 if self.solve_gui():
                     return True
@@ -133,6 +135,8 @@ class Grid:
                 self.update_model_values()
                 self.cells[row][col].draw_change(self.windows, False)
                 pygame.display.update()
-                pygame.time.delay(100)
+                pygame.time.delay(int(self.delay))
+                if self.delay > 0.5:
+                    self.delay -= 0.5
 
         return False
